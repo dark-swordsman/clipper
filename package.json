@@ -1,0 +1,21 @@
+{
+  "name": "clipper",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dark-swordsman/clipper.git"
+  },
+  "author": "Kyle Barr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dark-swordsman/clipper/issues"
+  },
+  "dependencies": {
+    "axios": "^0.19.2"
+  }
+}
