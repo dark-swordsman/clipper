@@ -1,43 +1,46 @@
 // standard modules
 const fs = require('fs');
 const axios = require('axios');
+const moment = require('moment');
 // custom modules
+const ask = require('./Ask');
 const ClipperError = require('./ClipperError');
+const Prog = require('./Prog');
 
 class Clipper {
-  constructor({twitchOAuth}) {
+  constructor({ twitchOAuth, broadcasterName }) {
     this.oauth = {
       ...twitchOAuth,
-      token: null
+      token: {}
     };
     this.clips = [];
+    this.broadcasterName = broadcasterName;
+    this.broadcasterId = '';
   }
 
   async initialize() {
-    console.log('\n-------------------------');
-    console.log(' Initializing Clipper...');
-    console.log('-------------------------');
+    console.log('\n-------------------------\n Initializing Clipper...\n-------------------------\n');
     await this.checkOAuthConfig();
     await this.authenticate();
-    console.log('\n-------------------------');
-    console.log(' Initializing completed!');
-    console.log('-------------------------');
+    await this.getBroadcasterIdByBroadcasterName();
+    console.log('\n---------------------------\n Initialization completed!\n---------------------------');
   }
 
   async checkOAuthConfig() {
-    const { clientID, clientSecret, grantType, scope } = this.oauth;
+    const { clientId, clientSecret, grantType, scope } = this.oauth;
     // console.log('\nChecking config.json...')
-    process.stdout.write('\nChecking config.json: ...');
-    
+    const oauthProgress = new Prog('Checking OAuth in config.json');
 
     // check if credentials are valid
     const emptyFields = [];
-    if (!clientID) emptyFields.push('clientID');
+
+    if (!clientId) emptyFields.push('clientId');
     if (!clientSecret) emptyFields.push('clientSecret');
     if (!grantType) emptyFields.push('grantType');
     if (!scope) emptyFields.push('scope');
 
     if (emptyFields.length > 0) { 
+      oauthProgress.finish(false);
       throw new ClipperError({
         errorType: 'CONFIGURATION ERROR',
         errorLocation: 'AUTHENTICATION',
@@ -45,28 +48,27 @@ class Clipper {
         exit: true
       });
     } else {
-       // end the line
+      oauthProgress.finish(true);
       return false;
     }
   }
 
   async authenticate() {
-    const { clientID, clientSecret, grantType, scope } = this.oauth;
-    console.log('\nGetting OAuth credentials from Twitch...');
+    const { clientId, clientSecret, grantType, scope } = this.oauth;
+    const authProgress = new Prog('Getting OAuth credentials from Twitch');
   
     try {
       // try to authenticate with Twitch's API
-      authenticationResponse = await axios({
+      const authenticationResponse = await axios({
         method: 'POST',
-        url: `https://id.twitch.tv/oauth2/token
-              ?client_id=${clientID}
-              &client_secret=${clientSecret}
-              &grant_type=${grantType}
-              &scope=${scope}`
+        url: `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=${grantType}&scope=${scope}`
       });
-  
-      console.log(authenticationResponse.data);
+
+      this.oauth.token = {...authenticationResponse.data};
+
+      authProgress.finish(true);
     } catch (err) {
+      authProgress.finish(false);
       new ClipperError({
         errorType: 'AXIOS ERROR',
         errorLocation: 'AUTHENTICATION',
@@ -76,14 +78,78 @@ class Clipper {
     }
   }
 
-  async retrieveClipMetadata(slug) {
-    console.log('Getting clip metadata...\n');
-  
+  async getBroadcasterIdByBroadcasterName() {
+    const broadcasterProgress = new Prog('Getting broadcaster ID');
+
     try {
-      // TODO: Twitch API for getting clips;
+      const broadcasterResponse = await axios({
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.oauth.token.access_token}`,
+          'Client-Id': this.oauth.clientId
+        },
+        url: `https://api.twitch.tv/helix/users?login=${this.broadcasterName}`
+      });
+  
+      this.broadcasterId = broadcasterResponse.data;
+
+      broadcasterProgress.finish(true);
+    } catch(err) {
+      broadcasterProgress.finish(false);
+      new ClipperError({
+        errorType: 'AXIOS ERROR',
+        errorLocation: 'RETRIEVE BROADCASTER ID',
+        message: err,
+        exit: true
+      });
+    }
+  }
+
+  async getClipsMetadataByBroadcasterId() {
+    const clipMetaProgress = new Prog('Getting clip metadata');
+
+    // confirm broadcaster id is set
+    if (!this.broadcasterId) {
+      new ClipperError({
+        errorType: 'CONFIGURATION ERROR',
+        errorLocation: 'RETRIEVE CLIP METADATA',
+        message: 'broadcasterId is not set. This might be a twitch API issue.',
+        exit: true
+      });
+    }
+
+    // get time period
+    let timePeriod = parseInt(await ask.q('Specify time period in days (from today): '));
+
+    while (isNaN(timePeriod)) {
+      console.log('\n  Not a number. Please try again.\n');
+
+      timePeriod = parseInt(await ask.q('Specify time period in days (from today): '));
+    }
+
+    const startedAt = moment().subtract(timePeriod, 'days').toISOString();
+
+    try {
+      const clipResponse = await axios({
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.oauth.token.access_token}`,
+          'Client-Id': this.oauth.clientId
+        },
+        url: `https://api.twitch.tv/helix/clips?broadcaster_id=${this.broadcasterId}&started_at=${startedAt}`
+      });
+
+      console.log(clipResponse.data);
+
+      clipMetaProgress.finish(true);
     } catch (err) {
-      console.error('\nDOWNLOAD FAILED');
-      console.error(err);
+      clipMetaProgress.finish(false);
+      new ClipperError({
+        errorType: 'AXIOS ERROR',
+        errorLocation: 'RETRIEVE CLIP METADATA',
+        message: err,
+        exit: true
+      });
     }
   }
   
