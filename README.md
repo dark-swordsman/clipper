@@ -32,4 +32,12 @@ Since most of you viewing this are *probably* on Windows 10, have never heard of
 6. Once it finishes, run `npm start` or `npm run start`.
 7. The application will prompt you for the time period (in days from today).
     - For example: `7` days from today would be a week ago.
-8. The application will download the clips to a new folder in the specified download directory named `clips_<broadcaster name>_<date in [ISO-8601]()>`
+8. The application will download the clips to a new folder in the specified download directory named `clips_<broadcaster name>_<MM-DD-YYYY_hhmmss>`, and exit automatically.
+
+## Collaboration
+
+I didn't provide a license because I really don't care what you do with this. If you want to steal it, modify it, and use it in your enterprise application, go right ahead. I don't even care if you copy the repo and say you made it. I just use this program for myself.
+
+### Submitting PRs
+
+If you want to make a fork and submit PRs, go right ahead. Just make sure you submit PRs against `develop` and not `master`.
