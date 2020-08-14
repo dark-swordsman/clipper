@@ -3,12 +3,11 @@ const config = require('./config.json');
 
 console.log('\nWelcome to Clipper!');
 
-const clipper = new Clipper({
-  twitchOAuth: config.twitchOAuth,
-  broadcasterID: config.clips.broadcasterID
-});
+const clipper = new Clipper(config);
 
 (async () => {
   await clipper.initialize();
   await clipper.getClipsMetadataByBroadcasterId();
+  await clipper.createClipFolder();
+  await clipper.batchDownloadClips();
 })()

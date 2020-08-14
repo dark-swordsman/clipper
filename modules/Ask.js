@@ -7,7 +7,7 @@ class Ask {
           output: process.stdout
         });
 
-        rl.question(question, (input) => {
+        rl.question(`[QUESTION]: ${question}`, (input) => {
           rl.close();
           resolve(input);
         });

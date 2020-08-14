@@ -1,11 +1,13 @@
 {
   "twitchOAuth": {
     "clientId": "",
-    "redirectURI": "http://localhost",
-    "responseType": "code",
+    "clientSecret": "",
+    "grantType": "client_credentials",
     "scope": "clips:edit user:read:email"
   },
   "clips": {
-    "broadcasterId": ""
+    "broadcasterId": "",
+    "downloadLocation": "",
+    "metadataTempLocation": "NOT REQUIRED"
   }
 }

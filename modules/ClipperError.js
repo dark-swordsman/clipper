@@ -1,6 +1,6 @@
 class ClipperError extends Error {
   constructor ({errorType, errorLocation, message, exit}) {
-    console.error(`\nCLIPPER ERROR: ${message}\n`);
+    console.error(`\n\nCLIPPER ERROR: ${message}\n`);
     console.error(`    TYPE: ${errorType}`);
     console.error(`    LOCATION: ${errorLocation}`);
     console.error(`    MESSAGE: "${message}"`);
