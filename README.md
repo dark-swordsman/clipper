@@ -1,6 +1,6 @@
 # clipper
 
-Node.js utility to download all latest twitch clips from a specific broadcaster.
+Node.js utility to download twitch clips from a specific broadcaster.
 
 ## Prerequisites
 
