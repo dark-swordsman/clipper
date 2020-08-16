@@ -181,7 +181,7 @@ class Clipper {
           'Authorization': `Bearer ${token.access_token}`,
           'Client-Id': clientId
         },
-        url: `https://api.twitch.tv/helix/clips?broadcaster_id=${broadcasterId}&started_at=${startedAt}`
+        url: `https://api.twitch.tv/helix/clips?broadcaster_id=${broadcasterId}&started_at=${startedAt}&first=100`
       });
 
       this.setState({ clips: clipResponse.data.data });
