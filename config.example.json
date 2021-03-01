@@ -6,7 +6,7 @@
     "scope": "clips:edit user:read:email"
   },
   "clips": {
-    "broadcasterId": "",
+    "broadcasterName": "",
     "downloadLocation": "",
     "metadataTempLocation": "NOT REQUIRED"
   }
